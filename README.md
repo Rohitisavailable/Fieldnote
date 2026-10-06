@@ -2,6 +2,8 @@
 
 **A pocket prompt for being outside.** Write down something you noticed, get one small nudge to look or listen more closely, then put your phone away.
 
+**Live app:** [trailside.onrender.com](https://trailside.onrender.com/)
+
 Fieldnote runs an open-weight language model in the browser. It does not need an account, location permission, API key, or inference server.
 
 ## Try it locally
