@@ -4,36 +4,76 @@
 
 **Live app:** [trailside.onrender.com](https://trailside.onrender.com/)
 
-Fieldnote runs an open-weight language model in the browser. It does not need an account, location permission, API key, or inference server.
+Fieldnote keeps an on-device model for compatible browsers and offers an explicit hosted fallback for phones and computers without a compatible WebGPU adapter.
 
-## Try it locally
+## AI options
 
-From this directory, start a local web server:
+### On device
+
+- **Model:** Qwen2.5-0.5B-Instruct in MLC format.
+- **Runtime:** [WebLLM](https://github.com/mlc-ai/web-llm), an open-source browser inference runtime using WebGPU.
+- Field notes stay in the browser when using the local option.
+- The first model load downloads a few hundred megabytes. WebLLM caches the model in browser storage for this site; the cache is separate for the Render and localhost origins.
+
+### Hosted fallback
+
+Choose **Send note to hosted model** to send a note through the `field-prompt` Supabase Edge Function to Backboard and its configured model provider. This is an explicit choice, so the local path remains available for devices that support it.
+
+Hosted prompts require internet. Backboard creates a thread for a message request; disabling assistant memory does not mean the request is processed only on-device. Review Backboard's data-retention terms, and disclose hosted processing to visitors. Provider usage may be billed.
+
+The function requires an explicit provider and model ID; it does not rely on Backboard's default model. Choose an open-weight model from Backboard's current model catalog if you want the hosted fallback to use open weights too.
+
+Fieldnote is not a wildlife identifier or a source of trail-safety advice. Small models can invent details; keep a safe distance from animals and follow local guidance.
+
+## Run locally
+
+From this directory, serve the static files:
 
 ```powershell
 python -m http.server 8000
 ```
 
-Open <http://localhost:8000> in a current browser with WebGPU support, then select **Load local model**. The first load needs an internet connection to fetch WebLLM and the model files. Wait for **Ready on this device**, enter a note, and select **Find a field prompt**.
+Open <http://localhost:8000> in a current WebGPU-capable browser. Select **Load local model** while online for the first download. If WebGPU is unavailable, the labeled sample prompt still works. The hosted option appears when the public Supabase configuration below is filled in.
 
-If WebGPU is unavailable or the model has not been loaded, the app uses a small built-in prompt and labels it **SAMPLE · NOT AI**.
+## Configure Supabase and Backboard
 
-## How the model works
+The browser needs the Supabase project URL and its **publishable/anon key**. These are public client configuration values, not provider secrets. Fill in `supabase-config.js`:
 
-- **Model:** Qwen2.5-0.5B-Instruct in MLC format.
-- **Runtime:** [WebLLM](https://github.com/mlc-ai/web-llm), an open-source browser inference runtime using WebGPU.
-- **Inference:** Runs on the visitor's device. The field note is passed to the model in the browser; Fieldnote has no server-side prompt endpoint.
-- **Caching:** WebLLM caches model files in browser storage. The first download can take time and uses device storage. The cache belongs to the site origin, so a Render deployment needs its own first download.
+```js
+window.FIELDNOTE_SUPABASE = Object.freeze({
+  url: "https://YOUR_PROJECT_REF.supabase.co",
+  anonKey: "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY"
+});
+```
 
-Fieldnote currently loads WebLLM from an ESM CDN and downloads model assets on first use. A cached model does not make the entire app reliably offline: the page and runtime still need to be available. A service worker and self-hosted dependencies would be needed for a dependable offline-first install.
+Never place a Supabase secret/service-role key or the Backboard API key in this file, `app.js`, or any other static asset. Supabase Auth must have anonymous sign-ins enabled; Fieldnote uses an anonymous Supabase Auth session so the Edge Function can apply a per-user quota.
 
-## Known limitations
+From this directory, link the Supabase project and apply the additive quota migration:
 
-Qwen 0.5B is a small model. Its suggestions can be vague or make up details about wildlife. Fieldnote is for curiosity prompts, not species identification, trail safety, or wildlife guidance. Keep a safe distance from animals and follow local guidance.
+```powershell
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push
+```
 
-## Deploy to Render
+Set the Backboard key, an explicit provider/model, and the allowed browser origins as Supabase Function secrets. Use an open-weight model ID from the Backboard catalog; the model string below is a placeholder, not a verified model selection.
 
-Push this project to a GitHub or GitLab repository, connect the repository in Render, and create a **Static Site** with:
+```powershell
+supabase secrets set "TRAILSIDE_BACKBOARD_API_KEY=YOUR_BACKBOARD_KEY" "BACKBOARD_LLM_PROVIDER=openrouter" "BACKBOARD_MODEL_NAME=YOUR_OPEN_WEIGHT_MODEL_ID" "FIELDNOTE_ALLOWED_ORIGINS=https://trailside.onrender.com,http://localhost:8000,http://127.0.0.1:8000"
+```
+
+Then deploy the function:
+
+```powershell
+supabase functions deploy field-prompt --project-ref YOUR_PROJECT_REF
+```
+
+The function keeps `TRAILSIDE_BACKBOARD_API_KEY` server-side, validates the signed-in Supabase user, limits each guest session to 12 hosted requests per UTC day, and accepts requests only from the configured origins. This app-specific secret name avoids replacing a `BACKBOARD_API_KEY` used by another app in the same Supabase project. Update `FIELDNOTE_ALLOWED_ORIGINS` if you use a custom domain.
+
+The Supabase publishable/anon key in `supabase-config.js` identifies the public project; it is not the Backboard credential. If the only key you have is a Supabase key, you still need a Backboard API key for Backboard inference.
+
+## Deploy the frontend to Render
+
+Connect the repository to Render as a **Static Site**:
 
 | Setting | Value |
 | --- | --- |
@@ -41,15 +81,17 @@ Push this project to a GitHub or GitLab repository, connect the repository in Re
 | Build Command | `echo "No build step"` |
 | Publish Directory | `.` |
 
-No environment variables, API keys, backend, or GPU server are required. Render hosts the static files; each visitor's browser runs the model. On the deployed URL, visitors need a WebGPU-capable browser for local generation. Render's [Static Site](https://render.com/docs/static-sites) and [monorepo](https://render.com/docs/monorepo-support) docs explain these settings.
+Render serves the static frontend. Supabase Edge Functions deploy separately using the commands above; publishing the static site alone does not enable hosted inference. See Render's [Static Site](https://render.com/docs/static-sites) and [monorepo](https://render.com/docs/monorepo-support) docs.
 
 ## Project files
 
-- `index.html` — Fieldnote interface
-- `style.css` — responsive visual styles
-- `app.js` — model setup, prompt generation, and labeled sample fallback
+- `index.html`, `style.css`, `app.js` — interface and local inference
+- `supabase-config.js` — public Supabase project configuration; contains no secrets
+- `supabase/functions/field-prompt/` — authenticated hosted-model proxy
+- `supabase/migrations/` — per-guest daily usage limit
+- `supabase/functions/.env.example` — names of server-side function settings
 - `LICENSE` — MIT license for this project
 
-## Open innovation
+## Why open models
 
-Keeping inference on-device means field notes are not sent to a hosted model provider, and there is no per-prompt API charge. The model ID and behavior prompt are visible in `app.js`, so builders can adapt them. In exchange, visitors need a compatible device, the first model download takes time, and a small model is less reliable than a larger hosted one.
+The local open-weight model keeps notes on the device and works after its model download when the page/runtime are available. It has no per-request provider charge, but requires WebGPU and may be less reliable than a larger model. The hosted fallback serves devices without WebGPU, at the cost of connectivity, provider usage charges, and sending notes to Backboard and its selected model provider.

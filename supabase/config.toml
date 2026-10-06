@@ -1,0 +1,2 @@
+[functions.field-prompt]
+verify_jwt = true

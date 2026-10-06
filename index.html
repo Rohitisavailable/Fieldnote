@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="supabase-config.js"></script>
   <script type="module" src="app.js"></script>
 </head>
 <body>
@@ -23,7 +24,8 @@
       <div class="entry">
         <label for="observation">What are you noticing?</label>
         <textarea id="observation" maxlength="420" placeholder="A tiny orange mushroom beside the trail…" rows="3"></textarea>
-        <div class="entry-bottom"><span id="char-count">0 / 420</span><button id="wander" class="button" type="button"><span>Find a field prompt</span><b aria-hidden="true">↗</b></button></div>
+        <div class="entry-bottom"><span id="char-count">0 / 420</span><button id="hosted-wander" class="hosted-button" type="button" disabled>Send note to hosted model</button><button id="wander" class="button" type="button"><span>Find a field prompt</span><b aria-hidden="true">↗</b></button></div>
+        <p class="hosted-note" id="hosted-note">Hosted prompts send your note to Backboard and its selected model provider. They may be retained and can incur usage charges.</p>
       </div>
       <div class="suggestions" aria-label="Try a prompt"><span>TRY</span><button type="button" data-prompt="The wind is moving the tops of the trees, but the trail is still.">Wind in the trees</button><button type="button" data-prompt="I found a small mushroom growing beside the path.">A mushroom</button><button type="button" data-prompt="I can hear birds, but I can’t see where they are.">Hidden birds</button></div>
     </section>
