@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e8eadf">
+  <meta name="description" content="A quiet, local-first companion for noticing more outside.">
+  <title>Fieldnote — take a closer look</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="topbar"><a class="wordmark" href="#top" aria-label="Fieldnote home"><span class="mark">✳</span> fieldnote</a><span class="top-note">A pocket prompt for being outside</span></header>
+  <main id="top">
+    <section class="intro">
+      <div class="intro-copy"><p class="eyebrow"><span class="live-dot"></span> YOUR FIELD COMPANION</p><h1>Take a closer<br>look out there.</h1><p class="lede">Tell Fieldnote what caught your eye. Get one small nudge to notice more, then put your phone away.</p></div>
+      <div class="sun-mark" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><i></i></div>
+    </section>
+    <section class="workbench" aria-label="Fieldnote prompt">
+      <div class="entry">
+        <label for="observation">What are you noticing?</label>
+        <textarea id="observation" maxlength="420" placeholder="A tiny orange mushroom beside the trail…" rows="3"></textarea>
+        <div class="entry-bottom"><span id="char-count">0 / 420</span><button id="wander" class="button" type="button"><span>Find a field prompt</span><b aria-hidden="true">↗</b></button></div>
+      </div>
+      <div class="suggestions" aria-label="Try a prompt"><span>TRY</span><button type="button" data-prompt="The wind is moving the tops of the trees, but the trail is still.">Wind in the trees</button><button type="button" data-prompt="I found a small mushroom growing beside the path.">A mushroom</button><button type="button" data-prompt="I can hear birds, but I can’t see where they are.">Hidden birds</button></div>
+    </section>
+    <section id="result" class="result" aria-live="polite" hidden>
+      <div class="result-head"><span class="result-icon">✳</span><div><p class="eyebrow">A LITTLE FIELD PROMPT</p><h2 id="result-title">Stay with that.</h2></div><span id="source-badge" class="source-badge">LOCAL MODEL</span></div>
+      <p id="result-text" class="result-text"></p>
+      <div class="result-foot"><span>One minute. No need to record it.</span><button id="another" type="button">Try another note</button></div>
+    </section>
+    <section class="model-panel" aria-label="Local model setup">
+      <div class="model-copy"><span class="model-orb">◉</span><div><h2 id="model-title">Your guide can live on this device.</h2><p id="model-description">Load a compact open-weight model once. Your notes stay in this browser; after the download, prompts can work without a connection.</p></div></div>
+      <div class="model-action"><span id="model-status" role="status">Not loaded</span><button id="load-model" class="load-button" type="button">Load local model</button></div>
+      <div id="progress-wrap" class="progress-wrap" hidden><div class="progress-track"><span id="progress-bar"></span></div><span id="progress-text">Preparing model…</span></div>
+      <details class="model-details"><summary>What runs here?</summary><p>WebLLM runs Qwen2.5-0.5B-Instruct (open weights) in your browser with WebGPU. The first visit needs internet to download the model and app library. Browser storage keeps model files on this device for later offline use. No account, API key, or hosted inference.</p></details>
+    </section>
+    <footer><span>Notice something. Keep walking.</span><span>Built for the path, not the feed.</span></footer>
+  </main>
+</body>
+</html>
