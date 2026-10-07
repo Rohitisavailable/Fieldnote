@@ -10,7 +10,7 @@ const MAX_NOTE_LENGTH = 420;
 const SYSTEM_PROMPT = "You are Fieldnote, a gentle outdoor observation companion. Turn the user's field note into one specific, safe, sensory prompt that takes about one minute and invites the person to put their phone away. Do not identify species, infer that an animal is present beyond what the user said, suggest approaching/tracking wildlife, or give safety advice. Use one or two short sentences in plain language. Do not mention that you are an AI.";
 
 function allowedOrigins(): string[] {
-  const configured = Deno.env.get("FIELDNOTE_ALLOWED_ORIGINS")
+  const configured = Deno.env.get("TRAILSIDE_FIELDNOTE_ALLOWED_ORIGINS")
     ?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -77,8 +77,8 @@ Deno.serve(async (request: Request) => {
   }
 
   const backboardKey = Deno.env.get("TRAILSIDE_BACKBOARD_API_KEY");
-  const provider = Deno.env.get("BACKBOARD_LLM_PROVIDER");
-  const model = Deno.env.get("BACKBOARD_MODEL_NAME");
+  const provider = Deno.env.get("TRAILSIDE_BACKBOARD_LLM_PROVIDER");
+  const model = Deno.env.get("TRAILSIDE_BACKBOARD_MODEL_NAME");
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!backboardKey || !provider || !model || !supabaseUrl || !serviceRoleKey) {

@@ -55,10 +55,10 @@ supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
 ```
 
-Set the Backboard key, an explicit provider/model, and the allowed browser origins as Supabase Function secrets. Use an open-weight model ID from the Backboard catalog; the model string below is a placeholder, not a verified model selection.
+Set Trailside-specific Backboard credentials, provider/model, and allowed browser origins as Supabase Function secrets. These names are prefixed so they do not overwrite secrets used by other apps in this same Supabase project. Confirm the selected model ID is available to your Backboard account.
 
 ```powershell
-supabase secrets set "TRAILSIDE_BACKBOARD_API_KEY=YOUR_BACKBOARD_KEY" "BACKBOARD_LLM_PROVIDER=openrouter" "BACKBOARD_MODEL_NAME=YOUR_OPEN_WEIGHT_MODEL_ID" "FIELDNOTE_ALLOWED_ORIGINS=https://trailside.onrender.com,http://localhost:8000,http://127.0.0.1:8000"
+supabase secrets set "TRAILSIDE_BACKBOARD_API_KEY=YOUR_BACKBOARD_KEY" "TRAILSIDE_BACKBOARD_LLM_PROVIDER=openrouter" "TRAILSIDE_BACKBOARD_MODEL_NAME=google/gemma-3-12b-it" "TRAILSIDE_FIELDNOTE_ALLOWED_ORIGINS=https://trailside.onrender.com,http://localhost:8000,http://127.0.0.1:8000"
 ```
 
 Then deploy the function:
@@ -67,7 +67,7 @@ Then deploy the function:
 supabase functions deploy field-prompt --project-ref YOUR_PROJECT_REF
 ```
 
-The function keeps `TRAILSIDE_BACKBOARD_API_KEY` server-side, validates the signed-in Supabase user, limits each guest session to 12 hosted requests per UTC day, and accepts requests only from the configured origins. This app-specific secret name avoids replacing a `BACKBOARD_API_KEY` used by another app in the same Supabase project. Update `FIELDNOTE_ALLOWED_ORIGINS` if you use a custom domain.
+The function keeps all `TRAILSIDE_*` secrets server-side, validates the signed-in Supabase user, limits each guest session to 12 hosted requests per UTC day, and accepts requests only from the configured origins. Update `TRAILSIDE_FIELDNOTE_ALLOWED_ORIGINS` if you use a custom domain.
 
 The Supabase publishable/anon key in `supabase-config.js` identifies the public project; it is not the Backboard credential. If the only key you have is a Supabase key, you still need a Backboard API key for Backboard inference.
 
